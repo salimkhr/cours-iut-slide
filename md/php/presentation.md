@@ -1,3 +1,9 @@
+# student pack jetbrains 
+
+<img src="https://genqrcode.com/embedded?style=3&inner_eye_style=5&outer_eye_style=0&logo=d39c5f8a46783e216f7134dd68237acb&color=%23000000FF&background_color=%23FFFFFFFF&inner_eye_color=%23000000&outer_eye_color=%23000000&imageformat=svg&language=fr&frame_style=0&frame_text=SCAN%20ME&frame_text_icon_color=%23000000&frame_text_icon=null&frame_color=%23000000&frame_background_color=%23FFFFFF&frame_text_color=%23FFFFFF&invert_colors=false&gradient_style=0&gradient_color_start=%23FF0000&gradient_color_end=%237F007F&gradient_start_offset=5&gradient_end_offset=95&stl_type=1&logo_remove_background=null&stl_size=100&stl_qr_height=1.5&stl_base_height=2&stl_include_stands=false&stl_qr_magnet_type=3&stl_qr_magnet_count=0&type=0&text=https%3A%2F%2Fwww.jetbrains.com%2Facademy%2Fstudent-pack%2F&width=500&height=500&bordersize=2" alt="qr code" />
+
+---
+
 # Le programme
 
 | Langage       | Semestre |         Fonctionnalités pour le projet         |
