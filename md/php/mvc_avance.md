@@ -6,7 +6,7 @@
 
 Classe « Dieu » qui fait tout : HTML, DB, mail, logs…
 
-```{php}[]
+```{php}[4-23|27-38|40-48|50-52|53-51|63-66|68-75]
 <?php
 class UserController {
     public function register() {
@@ -104,13 +104,14 @@ $controller->register();
 
 ---
 
-# Étape 1 : Séparer la Vue du Contrôleur
+# Étape 1 
+## Séparer la Vue du Contrôleur
 
 ---
 
 ## Nouveau Contrôleur
 
-```{php}[1-3|5|8-10|20-30]
+```{php}[1-23|15-17]
 <?php
 class UserController extends Controller
 {
@@ -140,7 +141,7 @@ class UserController extends Controller
 
 ## Vue séparée
 
-```{php}[1-3|6|15-20]
+```{php}[1-21]
 <!DOCTYPE html>
 <html>
 <head>
@@ -166,13 +167,14 @@ class UserController extends Controller
 
 ---
 
-# Étape 2 : Créer un Repository
+# Étape 2 
+## Créer un Repository
 
 ---
 
 ## Contrôleur simplifié
 
-```{php}[1-3|7|15-20|28-33]
+```{php}[1-33|6-9|11-21]
 <?php
 class UserController extends Controller
 {
@@ -201,7 +203,7 @@ class UserController extends Controller
 
 ## Repository
 
-```{php}[1-3|5|10-15|20-30]
+```{php}[1-25|11-16|18-24]
 <?php
 class UserRepository
 {
@@ -231,13 +233,14 @@ class UserRepository
 
 ---
 
-# Étape 3 : Extraire la logique métier dans des Services
+# Étape 3
+### Extraire la logique métier dans des Services
 
 ---
 
 ## ValidationService
 
-```{php}[1-3|5-8|20-28]
+```{php}[1-18|4-9|11-17]
 <?php
 class ValidationService
 {
@@ -260,7 +263,8 @@ class ValidationService
 
 ---
 
-# Étape 4 : Interfaces et Inversion de Dépendances
+# Étape 4
+## Interfaces et Inversion de Dépendances
 
 ---
 
@@ -282,14 +286,296 @@ interface EmailSenderInterface
 
 ---
 
-## Vision globale
+## 🎯 Principe Central
 
-**Les dépendances pointent vers le domaine :**
+**La règle de dépendance** : Les dépendances pointent **uniquement vers l'intérieur**
 
-- Domaine : `User`, `ValidationService`
-- Application : `UserService`
-- Infrastructure : `UserRepository`, `SmtpEmailService`
-- Interface : `UserController`, `Vues`
+```
+┌─────────────────────────────────┐
+│   Interface (UI)                │  ← Externe
+├─────────────────────────────────┤
+│   Infrastructure (DB, Email)    │
+├─────────────────────────────────┤
+│   Application (Services)        │
+├─────────────────────────────────┤
+│   Domaine (Métier)              │  ← Cœur
+└─────────────────────────────────┘
+```
+
+---
+
+## 1️⃣ Couche Domaine
+
+**Le cœur métier**
+
+- Logique métier pure
+- Entités et règles business
+- ❌ Aucune dépendance technique
+- Exemple : règles de validation, calculs métier
+
+---
+
+## 2️⃣ Couche Application
+
+**L'orchestrateur**
+
+- Cas d'usage de l'application
+- Coordonne le domaine et l'infrastructure
+- Utilise des interfaces (pas d'implémentations)
+- Exemple : "Inscrire un utilisateur", "Passer une commande"
+
+---
+
+## 3️⃣ Couche Infrastructure
+
+**Les détails techniques**
+
+- Implémente les interfaces de l'Application
+- Accès DB, emails, APIs externes
+- Remplaçable sans toucher au métier
+- Exemple : Repository, EmailService, FileStorage
+
+---
+
+## 4️⃣ Couche Interface
+
+**Le point d'entrée**
+
+- Controllers, Views, CLI, API
+- Transforme les requêtes en appels métier
+- Formate les réponses
+- Exemple : UserController, API REST
+
+---
+
+## 🔄 Flux d'une Requête
+
+**Inscription utilisateur :**
+
+1. **Interface** : Reçoit POST /register
+2. **Application** : Vérifie l'email, crée l'utilisateur
+3. **Domaine** : Valide les règles métier
+4. **Infrastructure** : Sauvegarde en DB, envoie email
+5. **Interface** : Retourne la confirmation
+
+---
+
+## 💡 Avantages
+
+✅ Indépendance du framework  
+✅ Testabilité maximale  
+✅ Changement de DB sans impact  
+✅ Évolution facilitée  
+✅ Code maintenable
+
+---
+
+## 🎯 Quand l'Utiliser ?
+
+**✅ OUI** : Projets complexes, long terme, forte logique métier  
+**❌ NON** : Prototypes, petits scripts, deadline serrée
+
+---
+
+# Étape 6 : SOLID
+
+---
+
+## 🧱 Les 5 Principes
+
+```
+S - Single Responsibility
+O - Open/Closed
+L - Liskov Substitution
+I - Interface Segregation
+D - Dependency Inversion
+```
+
+**Objectif** : Code flexible, maintenable, compréhensible
+
+---
+
+## S - Single Responsibility
+
+### 📖 Principe
+
+**Une classe = une seule raison de changer**
+
+---
+
+### 🔴 Violation
+
+Une classe `User` qui :
+- Gère les données
+- Valide les entrées
+- Sauvegarde en DB
+- Envoie des emails
+
+**4 responsabilités = 4 raisons de changer**
+
+---
+
+### ✅ Solution
+
+Séparer en classes distinctes :
+- `User` : entité métier
+- `UserValidator` : validation
+- `UserRepository` : persistence
+- `EmailService` : notifications
+
+**1 classe = 1 responsabilité**
+
+---
+
+## O - Open/Closed
+
+### 📖 Principe
+
+**Ouvert à l'extension, fermé à la modification**
+
+Ajouter des fonctionnalités sans modifier le code existant
+
+---
+
+### 🔴 Violation
+
+Pour ajouter un nouveau type de notification (Slack, Discord...), on modifie la classe `NotificationService`
+
+**Risque** : casser le code existant
+
+---
+
+### ✅ Solution
+
+Utiliser des interfaces :
+- `NotificationInterface` (contrat)
+- `EmailNotification` (implémentation)
+- `SmsNotification` (implémentation)
+- `SlackNotification` (nouvelle classe, pas de modification)
+
+**Extension sans modification**
+
+---
+
+## L - Liskov Substitution
+
+### 📖 Principe
+
+**Les classes dérivées doivent pouvoir remplacer les classes de base**
+
+Respecter le contrat de la classe parente
+
+---
+
+### 🔴 Violation
+
+Un `Carré` hérite de `Rectangle`
+- `setWidth()` et `setHeight()` modifient les deux dimensions
+- Comportement différent du `Rectangle`
+- Casse les tests qui attendent un `Rectangle`
+
+**Le contrat est violé**
+
+---
+
+### ✅ Solution
+
+Ne pas hériter si le comportement diffère
+- Interface commune `Shape`
+- `Rectangle` implémente `Shape`
+- `Square` implémente `Shape`
+
+**Chacun respecte son contrat**
+
+---
+
+## I - Interface Segregation
+
+### 📖 Principe
+
+**Plusieurs petites interfaces spécifiques plutôt qu'une grosse générique**
+
+Ne pas forcer à implémenter des méthodes inutilisées
+
+---
+
+### 🔴 Violation
+
+Interface `Worker` avec :
+- `work()`
+- `eat()`
+- `sleep()`
+
+Un `Robot` doit implémenter `eat()` et `sleep()` inutilement
+
+---
+
+### ✅ Solution
+
+Interfaces spécifiques :
+- `Workable` : `work()`
+- `Eatable` : `eat()`
+- `Sleepable` : `sleep()`
+
+Chaque classe implémente ce dont elle a besoin
+
+---
+
+## D - Dependency Inversion
+
+### 📖 Principe
+
+**Dépendre d'abstractions, pas d'implémentations concrètes**
+
+Les modules de haut niveau ne dépendent pas des modules de bas niveau
+
+---
+
+### 🔴 Violation
+
+`UserService` crée directement une instance de `MySQLDatabase`
+
+**Couplage fort** : impossible de changer de DB
+
+---
+
+### ✅ Solution
+
+- `UserService` dépend de `DatabaseInterface`
+- `MySQLDatabase` implémente `DatabaseInterface`
+- Injection de dépendance
+
+**Remplaçable** : MySQL → PostgreSQL → MongoDB
+
+---
+
+## 📊 Récapitulatif SOLID
+
+| Principe | En bref |
+|----------|---------|
+| **S**RP | 1 classe = 1 responsabilité |
+| **O**CP | Extension sans modification |
+| **L**SP | Respecter les contrats |
+| **I**SP | Interfaces spécifiques |
+| **D**IP | Dépendre d'abstractions |
+
+---
+
+## 🎯 Bénéfices de SOLID
+
+✅ Code testable  
+✅ Code maintenable  
+✅ Code extensible  
+✅ Couplage faible  
+✅ Haute cohésion
+
+---
+
+## 🏆 Clean Architecture + SOLID
+
+**= Code professionnel de qualité**
+
+Indépendant • Testable • Évolutif • Maintenable
 
 ---
 
@@ -352,5 +638,7 @@ project_tp/
 
 ---
 
+---
+
 # 🎓 Merci !
-### Questions ? 
+### Questions ?
